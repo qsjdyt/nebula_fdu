@@ -6,6 +6,7 @@
 #include "storage/query/GetPropProcessor.h"
 
 #include "storage/exec/GetPropNode.h"
+#include "storage/exec/NewGetPropNode.h"
 
 namespace nebula {
 namespace storage {
@@ -193,6 +194,7 @@ folly::Future<std::pair<nebula::cpp2::ErrorCode, PartitionID>> GetPropProcessor:
   });
 }
 
+/*
 StoragePlan<VertexID> GetPropProcessor::buildTagPlan(RuntimeContext* context,
                                                      nebula::DataSet* result) {
   StoragePlan<VertexID> plan;
@@ -205,6 +207,24 @@ StoragePlan<VertexID> GetPropProcessor::buildTagPlan(RuntimeContext* context,
   auto output = std::make_unique<GetTagPropNode>(context, tags, result, filter_, limit_);
   for (auto* tag : tags) {
     output->addDependency(tag);
+  }
+  plan.addNode(std::move(output));
+  return plan;
+}
+*/
+
+StoragePlan<VertexID> GetPropProcessor::buildTagPlan(RuntimeContext* context,
+                                                     nebula::DataSet* result) {
+  StoragePlan<VertexID> plan;
+  std::unordered_map<TagID, TagNode*> tagNodesMap;
+  for (const auto& tc : tagContext_.propContexts_) {
+    auto tag = std::make_unique<TagNode>(context, &tagContext_, tc.first, &tc.second);
+    tagNodesMap[tag->tagId()] = tag.get();
+    plan.addNode(std::move(tag));
+  }
+  auto output = std::make_unique<NewGetTagPropNode>(context, tagNodesMap, result, filter_, limit_);
+  for (const auto & tv : tagNodesMap) {
+    output->addDependency(tv.second);
   }
   plan.addNode(std::move(output));
   return plan;

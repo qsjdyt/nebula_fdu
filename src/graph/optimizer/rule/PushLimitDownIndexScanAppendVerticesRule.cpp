@@ -69,7 +69,7 @@ StatusOr<OptRule::TransformResult> PushLimitDownIndexScanAppendVerticesRule::tra
   const auto indexScan = static_cast<const IndexScan *>(indexScanGroupNode->node());
 
   int64_t limitRows = limit->offset() + limit->count();
-  if (IndexScan->limit() >= 0 && limitRows >= IndexScan->limit()) {
+  if (indexScan->limit() >= 0 && limitRows >= indexScan->limit()) {
     return TransformResult::noTransform();
   }
 
@@ -81,7 +81,7 @@ StatusOr<OptRule::TransformResult> PushLimitDownIndexScanAppendVerticesRule::tra
   auto newAppendVerticesGroup = OptGroup::create(octx);
   auto newAppendVerticesGroupNode = newAppendVerticesGroup->makeGroupNode(newAppendVertices);
 
-  auto newIndexScan = static_cast<IndexScan *>(IndexScan->clone());
+  auto newIndexScan = static_cast<IndexScan *>(indexScan->clone());
   newIndexScan->setLimit(limitRows);
   auto newIndexScanGroup = OptGroup::create(octx);
   auto newIndexScanGroupNode = newIndexScanGroup->makeGroupNode(newIndexScan);

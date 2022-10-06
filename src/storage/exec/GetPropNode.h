@@ -70,11 +70,11 @@ class GetTagPropNode : public QueryNode<VertexID> {
       ret = tagNode->collectTagPropsIfValid(
           [&row, tagNode, this](const std::vector<PropContext>* props) -> nebula::cpp2::ErrorCode {
             for (const auto& prop : *props) {
-              if (prop.returned_) {
+              if (prop.returned_) {       // although no prop (but such prop need to be returned), add an empty
                 row.emplace_back(Value());
               }
-              if (prop.filtered_ && expCtx_ != nullptr) {
-                expCtx_->setTagProp(tagNode->getTagName(), prop.name_, Value());
+              if (prop.filtered_ && expCtx_ != nullptr) {   // if filtered == null, not used
+                expCtx_->setTagProp(tagNode->getTagName(), prop.name_, Value()); 
               }
             }
             return nebula::cpp2::ErrorCode::SUCCEEDED;

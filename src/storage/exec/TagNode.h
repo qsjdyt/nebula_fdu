@@ -102,6 +102,11 @@ class TagNode final : public IterateNode<VertexID> {
     return valueHandler(key_, reader_.get(), props_);
   }
 
+  // unused valid_
+  nebula::cpp2::ErrorCode collectTagProps(PropHandler valueHandler){
+    return valueHandler(key_, reader_.get(), props_);
+  }
+
   bool valid() const override {
     return valid_;
   }
